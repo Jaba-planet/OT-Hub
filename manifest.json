@@ -1,0 +1,58 @@
+{
+  "name": "OT Hub",
+  "short_name": "OT Hub",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "SC1.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "SC2.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "SC3.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "SC4.png",
+      "sizes": "1080x2340",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "id": "/",
+  "description": "The essential study companion for Occupational Therapy students. Access a comprehensive library of class notes, quizzes, and past qualifying examination papers from Year 1 to Year 3, all in one place.",
+  "dir": "auto",
+  "scope": "/",
+  "lang": "en",
+  "categories": [
+    "health",
+    "medical",
+    "education"
+  ]
+}
