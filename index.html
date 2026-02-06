@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OT Hub</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    
+    <div id="custom-splash" class="splash-container">
+        <div class="splash-content">
+            <div class="splash-icon-box mb-4">
+                <i class="fas fa-notes-medical"></i>
+            </div>
+            <h1 class="splash-title">OT Hub</h1>
+            <p class="splash-subtitle">Study. Practice. Excel</p>
+            <div class="splash-loader"></div>
+        </div>
+    </div>
+
+    <div id="installPrompt" class="d-none">
+        <div class="d-flex align-items-center justify-content-between">
+            <div><h6 class="fw-bold text-white mb-0">Install App</h6><span class="text-secondary small">Add to home screen</span></div>
+            <button id="btnInstall" class="btn btn-light btn-sm fw-bold rounded-pill px-3">Install</button>
+        </div>
+    </div>
+
+    <div id="downloadOverlay" class="d-none">
+        <div class="download-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small fw-bold text-white"><i class="fas fa-cloud-download-alt text-success me-2"></i>Downloading...</span>
+                <span id="dlPercent" class="small text-secondary" style="font-family: 'JetBrains Mono'">0%</span>
+            </div>
+            <div class="progress" style="height: 6px; background: #333;"><div id="dlBar" class="progress-bar bg-success" style="width: 0%"></div></div>
+        </div>
+    </div>
+
+    <div id="nativeViewer" class="viewer-container">
+        <div class="viewer-header">
+            <button class="btn text-white p-0" onclick="window.closeViewer()"><i class="fas fa-chevron-left me-2"></i> Back</button>
+            <span id="viewerTitle" class="viewer-title">Document</span>
+            <button class="btn text-white p-0" id="viewerDownloadBtn"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="viewer-body"><iframe id="docFrame"></iframe></div>
+    </div>
+    <iframe id="downloadFrame"></iframe>
+
+    <div class="app-top-section">
+        <header class="app-header">
+            <div class="brand-text">
+                <span class="icon-box pulse-animation"><i class="fas fa-notes-medical"></i></span>
+                <span>OT Hub</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn border-0 p-0" id="btnSearchToggle"><i class="fas fa-search fa-lg"></i></button>
+                <button class="btn border-0 p-0" data-bs-toggle="modal" data-bs-target="#milestoneModal"><i class="fas fa-baby fa-lg"></i></button>
+                <button class="btn border-0 p-0" data-bs-toggle="modal" data-bs-target="#modelModal"><i class="fas fa-cube fa-lg"></i></button>
+                <button class="btn border-0 p-0" id="btnThemeToggle" onclick="window.toggleTheme()"><i class="fas fa-moon fa-lg"></i></button>
+                <button class="btn border-0 p-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu"><i class="fas fa-bars-staggered fa-lg"></i></button>
+            </div>
+        </header>
+
+        <div id="chipContainer" class="chip-scroll-container">
+            </div>
+        
+        <div class="search-wrapper d-none animate__animated animate__fadeInDown" id="searchContainer">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search resources...">
+            <button class="btn border-0 p-2 ms-2 text-secondary" id="btnCloseSearch">
+                <i class="fas fa-times fa-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="scrollable-content" id="scrollArea">
+        <div id="ptrVisual" class="ptr-visual">
+            <div class="ptr-icon"><i class="fas fa-arrow-down"></i></div>
+            <div class="ptr-spinner d-none"><i class="fas fa-spinner fa-spin"></i></div>
+        </div>
+
+        <div id="contentList">
+            <div class="app-card skeleton">
+                <div style="height:100px;"></div>
+            </div>
+        </div>
+        <div id="loadingMore" class="loader-dots">Loading more resources...</div>
+    </div>
+
+    <div id="fabMenu" class="fab-menu">
+        <button class="fab-mini" data-bs-toggle="modal" data-bs-target="#submitModal" title="Upload">
+            <i class="fas fa-cloud-upload-alt"></i> <span class="fab-label">Upload</span>
+        </button>
+        <button class="fab-mini" data-bs-toggle="modal" data-bs-target="#ageCalcModal" title="Age Calc">
+            <i class="fas fa-calculator"></i> <span class="fab-label">Age Calc</span>
+        </button>
+    </div>
+    <button id="mainFab" class="fab-float pulse-animation">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <footer class="app-footer">
+        <a href="#" class="footer-link active" id="nav-paper" onclick="window.switchTab('paper')"><i class="fas fa-file-alt"></i><span>Papers</span></a>
+        <a href="#" class="footer-link" id="nav-note" onclick="window.switchTab('note')"><i class="fas fa-book"></i><span>Notes</span></a>
+        <a href="#" class="footer-link" data-bs-toggle="offcanvas" data-bs-target="#sideMenu"><i class="fas fa-bars"></i><span>Menu</span></a>
+    </footer>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sideMenu">
+        <div class="sidebar-header">
+            <h5 class="fw-bold mb-1" style="color:var(--text-primary)">Menu</h5>
+            <p class="text-secondary small mb-0">OT Hub v1.0</p>
+        </div>
+        <div class="p-3">
+            <a href="https://jabaplanet.blogspot.com" class="menu-link"><i class="fas fa-globe text-primary"></i> Jaba Planet</a>
+            <a href="#" onclick="window.location.href='https://wa.me/254796273110'" class="menu-link"><i class="fab fa-whatsapp text-success"></i> Support</a>
+            <hr class="border-secondary opacity-25">
+            <a href="#" class="menu-link" data-bs-toggle="modal" data-bs-target="#privacyModal"><i class="fas fa-user-shield"></i> Privacy Policy</a>
+            <a href="#" class="menu-link" data-bs-toggle="modal" data-bs-target="#termsModal"><i class="fas fa-gavel"></i> Terms of Use</a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="ageCalcModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0"><h5 class="modal-title fw-bold">Chronological Age</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="small text-secondary fw-bold">Date of Birth</label>
+                        <input type="date" id="calcDob" class="input-dark">
+                    </div>
+                    <div class="mb-3">
+                        <label class="small text-secondary fw-bold">Date of Test (Default: Today)</label>
+                        <input type="date" id="calcTestDate" class="input-dark">
+                    </div>
+                    <button onclick="window.calculateAge()" class="btn btn-open w-100 py-3 mb-3">Calculate</button>
+                    <div id="ageResult" class="d-none text-center p-3 rounded" style="background:var(--surface);">
+                        <div class="text-secondary small uppercase">Result</div>
+                        <h3 class="fw-bold mb-0" id="ageOutput"></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="detailsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Resource</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <div class="mb-4">
+                        <span id="detailUnit" class="fw-bold" style="font-size:0.8rem"></span>
+                        <h4 id="detailTitle" class="fw-bold mb-1"></h4>
+                        <p id="detailSub" class="text-secondary small mb-2"></p>
+                        <div class="card-stats">
+                            <span class="stat-item"><i class="fas fa-eye"></i> <span id="detailViews">0</span></span>
+                            <span class="stat-item"><i class="fas fa-download"></i> <span id="detailDownloads">0</span></span>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 mb-4">
+                        <button id="btnRead" class="btn btn-open flex-grow-1"><i class="fas fa-book-open me-2"></i> Read</button>
+                        <button id="btnDownload" class="btn btn-secondary-icon flex-grow-1" style="width:auto; border-radius:20px; font-weight:700;">
+                            <i class="fas fa-download me-2"></i> Save
+                        </button>
+                    </div>
+                    <h6 class="text-secondary small fw-bold text-uppercase mb-3">Related</h6>
+                    <div id="relatedList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modelModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #1a1a1a; color: white;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-cube me-2"></i>3D Anatomy</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                
+                <div class="modal-body p-0 position-relative" style="height: 50vh; background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);">
+                    <model-viewer 
+                        id="otp3dViewer" 
+                        src="https://modelviewer.dev/shared-assets/models/Skeleton_01.glb" 
+                        alt="3D Anatomy Model" 
+                        auto-rotate 
+                        camera-controls 
+                        shadow-intensity="1" 
+                        style="width:100%; height:100%; --poster-color: transparent;">
+                    </model-viewer>
+
+                    <div id="modelLoader" class="position-absolute top-50 start-50 translate-middle d-none">
+                        <div class="spinner-border text-light"></div>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-dark border-top border-secondary">
+                    <p class="text-secondary small mb-2 fw-bold text-uppercase text-center">Select Model</p>
+                    <div class="d-flex justify-content-center gap-2 overflow-auto pb-2">
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3 active" onclick="switchModel('skeleton', this)">
+                            <i class="fas fa-skull-crossbones me-1"></i> Skeleton
+                        </button>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="switchModel('hand', this)">
+                            <i class="fas fa-hand-paper me-1"></i> Hand
+                        </button>
+                        <button class="btn btn-outline-light btn-sm rounded-pill px-3" onclick="switchModel('brain', this)">
+                            <i class="fas fa-brain me-1"></i> Brain
+                        </button>
+                    </div>
+                    <div class="text-center mt-2 text-secondary" style="font-size: 0.65rem;">
+                        <i class="fas fa-hand-pointer"></i> Drag to rotate &bull; Pinch to zoom
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="milestoneModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0"><h5 class="modal-title fw-bold">Milestones</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body px-4 pb-4">
+                    <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+                        <button class="btn btn-sm rounded-pill btn-outline-secondary active" onclick="window.filterMilestones('0-3m', this)">0-3m</button>
+                        <button class="btn btn-sm rounded-pill btn-outline-secondary" onclick="window.filterMilestones('4-6m', this)">4-6m</button>
+                        <button class="btn btn-sm rounded-pill btn-outline-secondary" onclick="window.filterMilestones('7-9m', this)">7-9m</button>
+                        <button class="btn btn-sm rounded-pill btn-outline-secondary" onclick="window.filterMilestones('10-12m', this)">10-12m</button>
+                    </div>
+                    <div id="milestoneContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="submitModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-bottom border-secondary p-3"><h5 class="modal-title fw-bold">Upload</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <form id="studentUploadForm">
+                        <select id="subType" class="input-dark"><option value="paper">FQE Paper</option><option value="note">Class Note</option></select>
+                        <select id="subUnit" class="input-dark" required><option value="" disabled selected>Select Unit...</option></select>
+                        <div id="subNoteFields" class="d-none">
+                            <input type="text" id="subTopic" class="input-dark" placeholder="Topic Name">
+                            <input type="text" id="subAuthor" class="input-dark" placeholder="Author Name">
+                        </div>
+                        <div id="subPaperFields">
+                            <div class="row g-2 mb-2">
+                                <div class="col-6"><input type="number" id="subYear" class="input-dark" placeholder="Year"></div>
+                                <div class="col-6"><select id="subSession" class="input-dark"></select></div>
+                            </div>
+                        </div>
+                        <input type="url" id="subLink" class="input-dark mb-4" placeholder="Google Drive Link" required>
+                        <button type="submit" class="btn btn-open w-100 py-3">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Privacy Policy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <p class="text-secondary small mb-4">Last Updated: February 2026</p>
+                    
+                    <h6 class="fw-bold text-white mb-2">1. Introduction</h6>
+                    <p class="text-secondary small mb-3">
+                        Welcome to OT Hub. We are committed to protecting your personal information and your right to privacy. This policy explains how we handle your data when you use our educational application. By accessing OT Hub, you agree to the collection and use of information in accordance with this policy.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">2. Information Collection</h6>
+                    <p class="text-secondary small mb-3">
+                        OT Hub is designed to be privacy-first. We do not require you to create an account or provide personal identifiers (such as your name, email address, or phone number) to browse or download resources. Any data entered into local tools, such as the Age Calculator, is processed entirely on your device and is never transmitted to our servers.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">3. Usage Data & Analytics</h6>
+                    <p class="text-secondary small mb-3">
+                        To improve the application, we may collect anonymous usage data. This includes information such as the type of device you use, your operating system version, and general interaction data (e.g., which papers are downloaded most frequently). This data is aggregated and cannot be used to identify any individual user personally.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">4. Third-Party Services</h6>
+                    <p class="text-secondary small mb-3">
+                        Our application utilizes third-party services to function effectively. Specifically, we use Google Firebase for database management and Google Drive for file hosting. When you interact with these services, their respective privacy policies apply. We encourage you to review Google's privacy terms for more details on how they handle data.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">5. Data Security</h6>
+                    <p class="text-secondary small mb-3">
+                        We implement standard security measures to protect the integrity of our application. However, please be aware that no method of transmission over the internet or method of electronic storage is 100% secure. While we strive to use commercially acceptable means to protect your data, we cannot guarantee its absolute security.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">6. Changes to This Policy</h6>
+                    <p class="text-secondary small mb-0">
+                        We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page. You are advised to review this Privacy Policy periodically for any changes. Continued use of the application after changes constitute acceptance of the new terms.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Terms of Use</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <p class="text-secondary small mb-4">Last Updated: February 2026</p>
+
+                    <h6 class="fw-bold text-white mb-2">1. Acceptance of Terms</h6>
+                    <p class="text-secondary small mb-3">
+                        By downloading, installing, or using OT Hub, you agree to be bound by these Terms of Use. If you disagree with any part of these terms, you may not access the service. These terms apply to all visitors, users, and others who access or use the application.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">2. Educational Purpose Only</h6>
+                    <p class="text-secondary small mb-3">
+                        The content provided on OT Hub, including past papers, notes, and calculators, is for general educational and informational purposes only. It is not intended to amount to medical advice on which you should rely. You must obtain professional or specialist advice before taking, or refraining from, any action on the basis of the content on our site.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">3. User Contributions</h6>
+                    <p class="text-secondary small mb-3">
+                        Users may submit educational materials (such as notes or papers) for inclusion in the app. By submitting content, you warrant that you own the rights to the material or have permission to share it. We reserve the right to review, accept, reject, or remove any user-contributed content at our sole discretion without prior notice.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">4. Intellectual Property</h6>
+                    <p class="text-secondary small mb-3">
+                        The OT Hub application, its original content (excluding user uploads), features, and functionality are and will remain the exclusive property of the developers. The "OT Hub" name and logo may not be used in connection with any product or service without the prior written consent of the developers.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">5. Disclaimer of Warranties</h6>
+                    <p class="text-secondary small mb-3">
+                        The service is provided on an "AS IS" and "AS AVAILABLE" basis. The developers make no representations or warranties of any kind, express or implied, as to the operation of their services, or the information, content, or materials included therein. You expressly agree that your use of these services is at your sole risk.
+                    </p>
+
+                    <h6 class="fw-bold text-white mb-2">6. Limitation of Liability</h6>
+                    <p class="text-secondary small mb-0">
+                        In no event shall the developers of OT Hub be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.
+                    </p>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button class="btn btn-secondary w-100" data-bs-dismiss="modal">I Agree</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container" style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); z-index: 9999;"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
