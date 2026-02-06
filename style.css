@@ -1,0 +1,298 @@
+/* --- RESET --- */
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+:root {
+    --bg-app: #09090b; 
+    --surface: #121212;
+    --surface-card: #18181b;
+    --border: #27272a;
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --accent-primary: #ffffff;
+    /* Header fits chip container */
+    --header-height: 96px; 
+    --footer-height: 60px;
+    --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+}
+
+/* Light Mode */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-app: #f4f4f5; --surface: #ffffff; --surface-card: #ffffff; 
+        --border: #e4e4e7; --text-primary: #18181b; --text-secondary: #71717a; 
+        --accent-primary: #000000;
+    }
+}
+/* Force Modes */
+body.force-dark { --bg-app: #09090b; --surface: #121212; --surface-card: #18181b; --border: #27272a; --text-primary: #ffffff; --text-secondary: #a1a1aa; --accent-primary: #ffffff; }
+body.force-light { --bg-app: #f4f4f5; --surface: #ffffff; --surface-card: #ffffff; --border: #e4e4e7; --text-primary: #18181b; --text-secondary: #71717a; --accent-primary: #000000; }
+
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body { font-family: 'Manrope', sans-serif; background-color: var(--bg-app); color: var(--text-primary); }
+
+/* =========================================
+   1. FIXED HEADER & CHIPS
+   ========================================= */
+.app-top-section {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--header-height); background: var(--bg-app);
+    border-bottom: 1px solid var(--border); z-index: 1000;
+    display: flex; flex-direction: column;
+}
+
+.app-header {
+    width: 100%; height: 50px; padding: 0 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    flex-shrink: 0;
+}
+
+/* Chip Container Styles */
+.chip-scroll-container {
+    height: 46px; width: 100%;
+    display: flex; align-items: center;
+    padding: 0 16px 8px 16px;
+    overflow-x: auto;
+    gap: 8px;
+    scrollbar-width: none; -ms-overflow-style: none;
+}
+.chip-scroll-container::-webkit-scrollbar { display: none; }
+
+.filter-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+.filter-chip.active {
+    background: var(--text-primary);
+    color: var(--bg-app);
+    border-color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.brand-text { font-weight: 800; font-size: 1rem; display: flex; align-items: center; gap: 10px; color: var(--text-primary); }
+.icon-box { width: 24px; height: 24px; background: var(--accent-primary); color: var(--bg-app); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+.header-actions { display: flex; gap: 15px; }
+.header-actions button { 
+    background: transparent !important; border: none !important; 
+    color: var(--text-primary) !important; padding: 4px; 
+    display: flex; align-items: center; justify-content: center;
+    transition: color 0.2s ease;
+}
+.header-actions button i { font-size: 1.15rem; }
+
+/* Search Overlay (FIXED) */
+.search-wrapper {
+    position: absolute; 
+    top: 0; left: 0; right: 0; 
+    /* Fix: Height is now 50px (matches header only), leaving chips visible */
+    height: 50px; 
+    background: var(--bg-app); 
+    padding: 0 16px; 
+    z-index: 1001; /* Above header, but allows chips to be seen below */
+    display: flex; 
+    align-items: center; 
+    gap: 10px; /* Space between input and close button */
+    border-bottom: 1px solid var(--border);
+}
+
+.search-input { 
+    flex-grow: 1; /* Input takes all available width */
+    width: auto; /* Reset fixed width */
+    background: var(--surface); 
+    border: 1px solid var(--border); 
+    color: var(--text-primary); 
+    padding: 0 12px 0 38px; /* Padding for text and search icon */
+    border-radius: 20px; /* Rounder, modern look */
+    height: 36px; /* Compact height */
+    font-size: 0.9rem;
+}
+
+.search-icon { 
+    position: absolute; 
+    left: 28px; /* Adjusted for padding */
+    top: 50%; 
+    transform: translateY(-50%); /* Perfect vertical center */
+    color: var(--text-secondary); 
+    font-size: 0.9rem; 
+    pointer-events: none; /* Let clicks pass through to input */
+}
+
+/* Close Button Style */
+#btnCloseSearch {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem;
+    transition: 0.2s;
+    flex-shrink: 0; /* Prevents button from being squashed */
+}
+#btnCloseSearch:active {
+    background: var(--text-primary);
+    color: var(--bg-app);
+}
+
+
+/* =========================================
+   2. CONTENT AREA
+   ========================================= */
+.scrollable-content {
+    position: absolute; top: var(--header-height); bottom: var(--footer-height); left: 0; right: 0;
+    overflow-y: auto; padding: 16px; width: 100%; max-width: 800px; margin: 0 auto;
+}
+
+/* =========================================
+   3. FIXED FOOTER & MENU
+   ========================================= */
+.app-footer {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: var(--footer-height); background: var(--surface-card);
+    border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around;
+    z-index: 1000;
+}
+.footer-link { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-secondary); text-decoration: none; font-size: 0.65rem; width: 60px; height: 100%; transition: 0.2s; }
+.footer-link i { font-size: 1.2rem; margin-bottom: 4px; transition: 0.2s; }
+.footer-link.active { color: var(--text-primary); }
+.footer-link.active i { transform: translateY(-3px); }
+
+.offcanvas { background-color: var(--bg-app) !important; border-right: 1px solid var(--border) !important; width: 280px !important; }
+.sidebar-header { padding: 30px 20px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(to bottom, var(--surface-card), var(--bg-app)); }
+.menu-link { padding: 14px 16px; margin: 8px 10px; border-radius: 12px; color: var(--text-primary); text-decoration: none; display: flex; align-items: center; font-size: 0.9rem; font-weight: 600; background: transparent; transition: background 0.2s, transform 0.1s; border: 1px solid transparent; }
+.menu-link i { width: 30px; text-align: center; margin-right: 10px; opacity: 0.7; }
+.menu-link:active, .menu-link:hover { background: var(--surface-card); border-color: var(--border); transform: scale(0.98); }
+
+/* =========================================
+   4. FAB SPEED DIAL
+   ========================================= */
+.fab-float { 
+    position: fixed; bottom: 80px; right: 20px; 
+    width: 56px; height: 56px; 
+    background: var(--text-primary); color: var(--bg-app); 
+    border-radius: 18px; border: none; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4); 
+    z-index: 900; font-size: 24px; 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+.fab-float.active { transform: rotate(45deg); background: var(--surface); color: var(--text-primary); border: 1px solid var(--border); }
+
+.fab-menu {
+    position: fixed; bottom: 145px; right: 28px;
+    display: flex; flex-direction: column; gap: 15px;
+    z-index: 899;
+    pointer-events: none;
+}
+.fab-mini {
+    width: 45px; height: 45px;
+    border-radius: 50%; border: none;
+    background: var(--surface-card); color: var(--text-primary);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    opacity: 0; transform: translateY(20px) scale(0.8);
+    transition: all 0.2s ease;
+    pointer-events: auto;
+    position: relative;
+}
+.fab-mini:active { transform: scale(0.9); }
+.fab-label {
+    position: absolute; right: 55px;
+    background: var(--surface-card); padding: 4px 10px;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+    white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    opacity: 0; transition: opacity 0.2s;
+    pointer-events: none;
+}
+.fab-menu.active .fab-mini { opacity: 1; transform: translateY(0) scale(1); }
+.fab-menu.active .fab-label { opacity: 1; }
+.fab-menu.active .fab-mini:nth-child(1) { transition-delay: 0.05s; }
+.fab-menu.active .fab-mini:nth-child(2) { transition-delay: 0s; }
+
+/* =========================================
+   5. PULL TO REFRESH & SPLASH
+   ========================================= */
+.ptr-visual { height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; transition: height 0.2s ease-out; }
+.ptr-visual.active { height: 60px; }
+.ptr-icon, .ptr-spinner { width: 36px; height: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); color: var(--text-primary); font-size: 14px; }
+.ptr-icon i { transition: transform 0.2s; }
+.ptr-pulling .ptr-icon i { transform: rotate(180deg); }
+
+.splash-container { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #000000; z-index: 99999; display: grid; place-items: center; transition: opacity 0.5s ease-out, visibility 0.5s; }
+.splash-content { text-center: center; display: flex; flex-direction: column; align-items: center; }
+.splash-icon-box { width: 60px; height: 60px; background: white; color: black; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 20px; animation: pulse 2s infinite; }
+.splash-title { font-weight: 800; font-size: 1.5rem; color: white; margin-bottom: 5px; }
+.splash-subtitle { color: #666; font-size: 0.8rem; margin-bottom: 20px; }
+.splash-loader { width: 100px; height: 3px; background: #333; border-radius: 2px; position: relative; overflow: hidden; }
+.splash-loader::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 30%; background: white; animation: slideLoad 1s infinite ease-in-out; }
+@keyframes slideLoad { 0% { left: -30%; } 100% { left: 100%; } }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* =========================================
+   6. CARDS & UTILS
+   ========================================= */
+.app-card { background: var(--surface-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 12px; position: relative; box-shadow: var(--shadow-card); transition: transform 0.2s; }
+.app-card:active { transform: scale(0.98); }
+.card-thumb-container { height: 120px; overflow: hidden; border-radius: 8px; margin-bottom: 10px; position: relative; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.card-thumb-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
+.meta-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 4px; font-weight: 700; text-transform: uppercase; }
+.card-title { font-weight: 700; font-size: 0.95rem; margin: 2px 0 4px; color: var(--text-primary); }
+.card-sub { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 8px; }
+.card-stats { display: flex; gap: 12px; font-size: 0.7rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+
+.badge-pill { font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; vertical-align: middle; font-weight: 700; }
+.badge-hot { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.badge-new { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.btn-open { background: var(--text-primary); color: var(--bg-app); border-radius: 8px; padding: 6px 14px; font-weight: 700; font-size: 0.75rem; border: none; }
+.btn-secondary-icon { background: var(--surface); border: 1px solid var(--border); color: var(--text-primary); width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.btn-whatsapp { background: #25D36615; border: 1px solid #25D36640; color: #25D366; width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+
+.d-none { display: none !important; }
+.skeleton { background: linear-gradient(90deg, var(--border) 25%, var(--surface) 50%, var(--border) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.modal-content { background: var(--surface-card); color: var(--text-primary); border: 1px solid var(--border); }
+.input-dark { background: var(--bg-app); border: 1px solid var(--border); color: var(--text-primary); padding: 12px; border-radius: 8px; width: 100%; margin-bottom: 12px; }
+
+#downloadOverlay { position: fixed; bottom: 90px; left: 20px; right: 20px; z-index: 2000; }
+.download-card { background: var(--surface-card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.8); }
+.viewer-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-app); z-index: 5000; transform: translateY(100%); transition: transform 0.3s; display: flex; flex-direction: column; }
+.viewer-container.active { transform: translateY(0); }
+.viewer-header { height: 50px; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; border-bottom: 1px solid var(--border); background: var(--bg-app); }
+.viewer-body { flex: 1; position: relative; }
+iframe { width: 100%; height: 100%; border: none; }
+/* --- INSTALL PROMPT POP-UP --- */
+#installPrompt {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background: var(--surface-card);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    z-index: 10000;
+    animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpFade {
+    from {
+        transform: translate(-50%, 100px);
+        opacity: 0;
+    }
+    to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+}
